@@ -2,6 +2,9 @@ import pygame
 import tkinter as tk
 from tkinter import ttk
 
+import self
+
+
 class Application(tk.Tk):
     def __init__(self, graph):
         super().__init__()
@@ -22,33 +25,42 @@ class Application(tk.Tk):
         self.submit_button = tk.Button(self, text="Encontrar Ruta", command=self.find_route)
         self.submit_button.pack()
 
-        tree = ttk.Treeview(self)
+        self.tree = ttk.Treeview(self)
 
-        tree['columns'] = ('Lugares')
+        self.tree['columns'] = ('Lugares')
 
-        tree.column("#0", width=0, stretch=tk.NO)
-        tree.column("Ciudad", anchor=tk.CENTER, width=120)
+        self.tree.column("#0", width=0, stretch=tk.NO)
+        self.tree.column("Lugares", anchor=tk.CENTER, width=120)
 
+        self.tree.heading("#0", text="", anchor=tk.CENTER)
+        self.tree.heading("Lugares", text="Lugares", anchor=tk.CENTER)
 
-        tree.heading("#0", text="", anchor=tk.CENTER)
-        tree.heading("Ciudad", text="Ciudad", anchor=tk.CENTER)
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=25)
+        style.map('Treeview', background=[('selected', 'blue')])
+
+        # Colorear las filas de manera alternada
+        self.tree.tag_configure('oddrow', background="lightblue")
+        self.tree.tag_configure('evenrow', background="lightyellow")
 
         data = [
             ("Chipre"),
             ("Cable"),
             ("Sultana"),
-            ( "Lusitania"),
+            ("Lusitania"),
             ("Bosque"),
             ("Enea"),
             ("Terminal"),
             ("Villa"),
         ]
 
-        for item in data:
-            tree.insert('', 'end', values=item)
+        for count, item in enumerate(data):
+            if count % 2 == 0:
+                self.tree.insert('', 'end', values=item, tags=('evenrow',))
+            else:
+                self.tree.insert('', 'end', values=item, tags=('oddrow',))
 
-        # Empaquetar el Treeview
-        tree.pack(pady=20)
+        self.tree.pack(pady=20)
 
     def find_route(self):
         start = self.start_entry.get()
@@ -56,7 +68,6 @@ class Application(tk.Tk):
         path = self.graph.shortest_path(start, end)
         print(f"Ruta más corta: {path}")
         VisualizeMap(self.graph, path)
-
 
 class VisualizeMap:
     def __init__(self, graph, path):
