@@ -12,12 +12,12 @@ class Graph:
             self.node_positions[name] = (x, y)
 
     def shortest_path(self, start, finish):
-        distances = {}  # Distance from start to node
-        previous = {}  # Previous node in optimal path from source
-        nodes = []  # Priority queue of all nodes in Graph
+        distances = {}
+        previous = {}
+        nodes = []
 
         for vertex in self.vertices:
-            if vertex == start:  # Set root node as distance of 0
+            if vertex == start:
                 distances[vertex] = 0
                 heapq.heappush(nodes, [0, vertex])
             else:
@@ -26,21 +26,21 @@ class Graph:
             previous[vertex] = None
 
         while nodes:
-            smallest = heapq.heappop(nodes)[1]  # Vertex in nodes with smallest distance in distances
-            if smallest == finish:  # If the closest node is our target we're done so print the path
+            smallest = heapq.heappop(nodes)[1]
+            if smallest == finish:
                 path = []
-                while previous[smallest]:  # Traverse through nodes til we reach the root which is 0
+                while previous[smallest]:
                     path.append(smallest)
                     smallest = previous[smallest]
                 path.append(start)
                 path.reverse()
                 return path
-            if distances[smallest] == sys.maxsize:  # All remaining vertices are inaccessible from source
+            if distances[smallest] == sys.maxsize:
                 break
 
-            for neighbor in self.vertices[smallest]:  # Look at all the nodes that this vertex is attached to
-                alt = distances[smallest] + self.vertices[smallest][neighbor]  # Alternative path distance
-                if alt < distances[neighbor]:  # If there is a new shortest path update our priority queue (relax)
+            for neighbor in self.vertices[smallest]:
+                alt = distances[smallest] + self.vertices[smallest][neighbor]
+                if alt < distances[neighbor]:
                     distances[neighbor] = alt
                     previous[neighbor] = smallest
                     for n in nodes:
