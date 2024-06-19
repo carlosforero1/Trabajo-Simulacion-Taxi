@@ -4,9 +4,12 @@ import sys
 class Graph:
     def __init__(self):
         self.vertices = {}
+        self.node_positions = {}  # Diccionario para almacenar las posiciones (x, y) de los nodos
 
-    def add_vertex(self, name, edges):
+    def add_vertex(self, name, edges, x=None, y=None):
         self.vertices[name] = edges
+        if x is not None and y is not None:
+            self.node_positions[name] = (x, y)
 
     def shortest_path(self, start, finish):
         distances = {}  # Distance from start to node

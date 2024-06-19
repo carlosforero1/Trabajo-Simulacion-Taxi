@@ -1,3 +1,5 @@
+import math
+
 import pygame
 import tkinter as tk
 from tkinter import ttk
@@ -39,7 +41,6 @@ class Application(tk.Tk):
         style.configure("Treeview", rowheight=25)
         style.map('Treeview', background=[('selected', 'blue')])
 
-        # Colorear las filas de manera alternada
         self.tree.tag_configure('oddrow', background="lightblue")
         self.tree.tag_configure('evenrow', background="lightyellow")
 
@@ -73,11 +74,11 @@ class VisualizeMap:
     def __init__(self, graph, path):
         self.graph = graph
         self.path = path
-        self.node_positions = {
-            'Chipre': (50, 50), 'Cable': (150, 50), 'Sultana': (250, 50),
-            'Lusitania': (50, 150), 'Bosque': (250, 150), 'Enea': (150, 150),
-            'Terminal': (250, 250), 'Villa': (50, 250)
-        }
+        self.node_positions = self.graph.node_positions
+        self.current_segment = 0  # Índice del segmento actual en la ruta
+        self.segment_progress = 0.0  # Progreso dentro del segmento actual (0.0 a 1.0)
+        self.taxi_position = None
+        self.taxi_speed = 2  # Velocidad de movimiento del taxi
         self.run()
 
     def run(self):
@@ -86,6 +87,8 @@ class VisualizeMap:
         pygame.display.set_caption("Mapa de Carro")
 
         running = True
+        clock = pygame.time.Clock()
+
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -93,27 +96,74 @@ class VisualizeMap:
 
             screen.fill((255, 255, 255))
 
-            # Draw edges
+            # Dibujar aristas
             for vertex, edges in self.graph.vertices.items():
                 for neighbor, weight in edges.items():
                     start_pos = self.node_positions[vertex]
                     end_pos = self.node_positions[neighbor]
                     pygame.draw.line(screen, (0, 0, 0), start_pos, end_pos, 2)
 
-            # Draw nodes
+            # Dibujar nodos
             for vertex, pos in self.node_positions.items():
-                color = (0, 255, 0) if vertex in self.path else (0, 0, 255)
-                pygame.draw.circle(screen, color, pos, 10)
+                pygame.draw.circle(screen, (0, 255, 0), pos, 10)
                 label = pygame.font.SysFont(None, 24).render(vertex, True, (0, 0, 0))
                 screen.blit(label, (pos[0] - 10, pos[1] - 10))
 
-            # Draw path
+            # Dibujar ruta más corta
             if self.path:
                 for i in range(len(self.path) - 1):
                     start_pos = self.node_positions[self.path[i]]
                     end_pos = self.node_positions[self.path[i + 1]]
                     pygame.draw.line(screen, (255, 0, 0), start_pos, end_pos, 2)
 
+            # Mover el taxi a lo largo de la ruta
+            if self.current_segment < len(self.path) - 1:
+                start_pos = self.node_positions[self.path[self.current_segment]]
+                end_pos = self.node_positions[self.path[self.current_segment + 1]]
+
+                # Calcular el punto intermedio en el segmento actual
+                segment_length = math.dist(start_pos, end_pos)
+                if segment_length > 0:
+                    dx = (end_pos[0] - start_pos[0]) / segment_length
+                    dy = (end_pos[1] - start_pos[1]) / segment_length
+                else:
+                    dx, dy = 0, 0
+
+                self.segment_progress += self.taxi_speed / segment_length
+                if self.segment_progress >= 1.0:
+                    # Pasar al siguiente segmento
+                    self.current_segment += 1
+                    self.segment_progress = 0.0
+
+                    # Ajustar posición inicial del próximo segmento
+                    if self.current_segment < len(self.path) - 1:
+                        start_pos = self.node_positions[self.path[self.current_segment]]
+                        end_pos = self.node_positions[self.path[self.current_segment + 1]]
+                        segment_length = math.dist(start_pos, end_pos)
+                        self.segment_progress = self.taxi_speed / segment_length
+
+                if self.current_segment < len(self.path) - 1:
+                    # Calcular posición actual del taxi
+                    current_pos = (start_pos[0] + dx * segment_length * self.segment_progress,
+                                   start_pos[1] + dy * segment_length * self.segment_progress)
+
+                    self.taxi_position = current_pos
+
+            # Dibujar el taxi
+            if self.taxi_position:
+                pygame.draw.circle(screen, (255, 0, 0), (int(self.taxi_position[0]), int(self.taxi_position[1])), 8)
+
             pygame.display.flip()
+            clock.tick(60)
 
         pygame.quit()
+    def is_within_screen(self, position, screen):
+        # Verificar si la posición está dentro de los límites de la pantalla
+        return 0 <= position[0] <= screen.get_width() and 0 <= position[1] <= screen.get_height()
+
+    def adjust_position_within_screen(self, position, screen):
+        # Ajustar la posición para que esté dentro de los límites de la pantalla
+        x = min(max(position[0], 0), screen.get_width())
+        y = min(max(position[1], 0), screen.get_height())
+        return (x, y)
+
