@@ -1,12 +1,13 @@
 import pygame
 import tkinter as tk
+from tkinter import ttk
 
 class Application(tk.Tk):
     def __init__(self, graph):
         super().__init__()
         self.graph = graph
         self.title("Mapa de Carro")
-        self.geometry("300x200")
+        self.geometry("600x500")
 
         self.start_label = tk.Label(self, text="Inicio:")
         self.start_label.pack()
@@ -21,6 +22,34 @@ class Application(tk.Tk):
         self.submit_button = tk.Button(self, text="Encontrar Ruta", command=self.find_route)
         self.submit_button.pack()
 
+        tree = ttk.Treeview(self)
+
+        tree['columns'] = ('Lugares')
+
+        tree.column("#0", width=0, stretch=tk.NO)
+        tree.column("Ciudad", anchor=tk.CENTER, width=120)
+
+
+        tree.heading("#0", text="", anchor=tk.CENTER)
+        tree.heading("Ciudad", text="Ciudad", anchor=tk.CENTER)
+
+        data = [
+            ("Chipre"),
+            ("Cable"),
+            ("Sultana"),
+            ( "Lusitania"),
+            ("Bosque"),
+            ("Enea"),
+            ("Terminal"),
+            ("Villa"),
+        ]
+
+        for item in data:
+            tree.insert('', 'end', values=item)
+
+        # Empaquetar el Treeview
+        tree.pack(pady=20)
+
     def find_route(self):
         start = self.start_entry.get()
         end = self.end_entry.get()
@@ -34,15 +63,15 @@ class VisualizeMap:
         self.graph = graph
         self.path = path
         self.node_positions = {
-            'A': (50, 50), 'B': (150, 50), 'C': (250, 50),
-            'D': (50, 150), 'E': (250, 150), 'F': (150, 150),
-            'G': (250, 250), 'H': (50, 250)
+            'Chipre': (50, 50), 'Cable': (150, 50), 'Sultana': (250, 50),
+            'Lusitania': (50, 150), 'Bosque': (250, 150), 'Enea': (150, 150),
+            'Terminal': (250, 250), 'Villa': (50, 250)
         }
         self.run()
 
     def run(self):
         pygame.init()
-        screen = pygame.display.set_mode((300, 300))
+        screen = pygame.display.set_mode((400, 400))
         pygame.display.set_caption("Mapa de Carro")
 
         running = True
