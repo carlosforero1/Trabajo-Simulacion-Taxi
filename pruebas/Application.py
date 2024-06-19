@@ -1,10 +1,7 @@
 import math
-
 import pygame
 import tkinter as tk
 from tkinter import ttk
-
-import self
 
 
 class Application(tk.Tk):
@@ -28,12 +25,9 @@ class Application(tk.Tk):
         self.submit_button.pack()
 
         self.tree = ttk.Treeview(self)
-
         self.tree['columns'] = ('Lugares')
-
         self.tree.column("#0", width=0, stretch=tk.NO)
         self.tree.column("Lugares", anchor=tk.CENTER, width=120)
-
         self.tree.heading("#0", text="", anchor=tk.CENTER)
         self.tree.heading("Lugares", text="Lugares", anchor=tk.CENTER)
 
@@ -70,6 +64,7 @@ class Application(tk.Tk):
         print(f"Ruta más corta: {path}")
         VisualizeMap(self.graph, path)
 
+
 class VisualizeMap:
     def __init__(self, graph, path):
         self.graph = graph
@@ -103,11 +98,11 @@ class VisualizeMap:
                     end_pos = self.node_positions[neighbor]
                     pygame.draw.line(screen, (0, 0, 0), start_pos, end_pos, 2)
 
-            # Dibujar nodos
+            # Dibujar nodos y etiquetas de nombres de calles
             for vertex, pos in self.node_positions.items():
                 pygame.draw.circle(screen, (0, 255, 0), pos, 10)
-                label = pygame.font.SysFont(None, 24).render(vertex, True, (0, 0, 0))
-                screen.blit(label, (pos[0] - 10, pos[1] - 10))
+                label = pygame.font.SysFont(None, 20).render(vertex, True, (0, 0, 0))
+                screen.blit(label, (pos[0] - label.get_width() // 2, pos[1] - label.get_height() // 2 - 15))
 
             # Dibujar ruta más corta
             if self.path:
@@ -157,6 +152,7 @@ class VisualizeMap:
             clock.tick(60)
 
         pygame.quit()
+
     def is_within_screen(self, position, screen):
         # Verificar si la posición está dentro de los límites de la pantalla
         return 0 <= position[0] <= screen.get_width() and 0 <= position[1] <= screen.get_height()
@@ -166,4 +162,5 @@ class VisualizeMap:
         x = min(max(position[0], 0), screen.get_width())
         y = min(max(position[1], 0), screen.get_height())
         return (x, y)
+
 
